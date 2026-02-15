@@ -9,7 +9,7 @@ import GalleryFilters from '@/components/gallery/GalleryFilters';
 import GalleryLightbox from '@/components/gallery/GalleryLightbox';
 
 // Cloudinary public URLs for maintenance images
-const CLOUDINARY_BASE = 'https://res.cloudinary.com/dhspqc6yh/image/upload/maintenance';
+const CLOUDINARY_BASE = 'https://res.cloudinary.com/dhspqc6yh/image/upload/v1/maintenance';
 const img01 = `${CLOUDINARY_BASE}/maintenance01.jpg`;
 const img02 = `${CLOUDINARY_BASE}/maintenance02.jpg`;
 const img03 = `${CLOUDINARY_BASE}/maintenance03.jpg`;
