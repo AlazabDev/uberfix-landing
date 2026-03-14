@@ -264,7 +264,8 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
       {/* WhatsApp Banner */}
       <button
         onClick={transferToWhatsApp}
-        className="flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors shrink-0"
+        className="flex items-center justify-center gap-2 px-3 py-2 text-primary-foreground text-xs font-medium transition-colors shrink-0"
+        style={{ background: 'hsl(152 69% 31%)' }}
       >
         <MessageSquare className="w-3.5 h-3.5" />
         {isRTL ? "تحدث مباشرة عبر واتساب الأعمال" : "Chat directly on WhatsApp Business"}
