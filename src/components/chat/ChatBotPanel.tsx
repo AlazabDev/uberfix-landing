@@ -1,7 +1,10 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
-import { Send, Bot, User, Sparkles, Minimize2, Camera, Mic, Image, MicOff, X } from "lucide-react";
+import {
+  Send, Bot, User, Sparkles, Minimize2, Camera, Mic, MicOff,
+  Paperclip, Phone, MessageSquare
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -13,13 +16,16 @@ interface Message {
   content: string;
   role: "user" | "bot";
   timestamp: Date;
-  type?: "text" | "image" | "voice";
+  type?: "text" | "image" | "voice" | "file";
   attachment?: string;
+  fileName?: string;
 }
 
 interface ChatBotPanelProps {
   onClose: () => void;
 }
+
+const WHATSAPP_NUMBER = "201028291995";
 
 const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
   const { t, i18n } = useTranslation();
@@ -28,9 +34,9 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
   const [messages, setMessages] = useState<Message[]>([
     {
       id: "1",
-      content: isRTL 
-        ? "مرحباً! أنا مساعد UberFix الذكي. كيف يمكنني مساعدتك اليوم؟ يمكنك إرسال صور أو رسائل صوتية لوصف المشكلة." 
-        : "Hello! I'm UberFix AI Assistant. How can I help you today? You can send photos or voice messages to describe the issue.",
+      content: isRTL
+        ? "مرحباً! أنا مساعد UberFix الذكي. كيف يمكنني مساعدتك اليوم؟"
+        : "Hello! I'm UberFix AI Assistant. How can I help you today?",
       role: "bot",
       timestamp: new Date(),
     },
@@ -42,18 +48,18 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  const cameraInputRef = useRef<HTMLInputElement>(null);
   const recordingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const quickActions = isRTL ? [
     "احجز خدمة صيانة",
     "أسعار الخدمات",
     "تتبع طلبي",
-    "تواصل مع الدعم",
   ] : [
     "Book a service",
     "Service pricing",
     "Track my order",
-    "Contact support",
   ];
 
   useEffect(() => {
@@ -70,122 +76,123 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
     };
   }, []);
 
-  const handleSendMessage = async () => {
+  const transferToWhatsApp = useCallback(() => {
+    const lastMessages = messages
+      .filter(m => m.role === "user")
+      .slice(-3)
+      .map(m => m.content)
+      .join("\n");
+
+    const greeting = isRTL ? "مرحباً، أريد المساعدة:" : "Hello, I need help:";
+    const text = encodeURIComponent(`${greeting}\n${lastMessages}`);
+    window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${text}`, "_blank");
+  }, [messages, isRTL]);
+
+  const addBotResponse = useCallback((content: string, delay = 1500) => {
+    setIsTyping(true);
+    setTimeout(() => {
+      setMessages(prev => [...prev, {
+        id: (Date.now() + 1).toString(),
+        content,
+        role: "bot",
+        timestamp: new Date(),
+      }]);
+      setIsTyping(false);
+    }, delay);
+  }, []);
+
+  const handleSendMessage = () => {
     if (!inputValue.trim()) return;
 
-    const userMessage: Message = {
+    setMessages(prev => [...prev, {
       id: Date.now().toString(),
       content: inputValue,
       role: "user",
       timestamp: new Date(),
       type: "text",
-    };
-
-    setMessages((prev) => [...prev, userMessage]);
+    }]);
     setInputValue("");
-    setIsTyping(true);
 
-    setTimeout(() => {
-      const botResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        content: isRTL
-          ? "شكراً لرسالتك! تم إنشاء تذكرة دعم برقم #" + Math.floor(Math.random() * 10000) + ". سيتم توصيلك بأحد ممثلي خدمة العملاء قريباً."
-          : "Thank you for your message! A support ticket #" + Math.floor(Math.random() * 10000) + " has been created. You'll be connected to a customer service representative shortly.",
-        role: "bot",
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, botResponse]);
-      setIsTyping(false);
-    }, 1500);
+    const ticketId = Math.floor(Math.random() * 10000);
+    addBotResponse(
+      isRTL
+        ? `شكراً لرسالتك! تم إنشاء تذكرة دعم #${ticketId}. سيتم الرد عليك قريباً.`
+        : `Thank you! Support ticket #${ticketId} created. You'll hear back soon.`
+    );
   };
 
-  const handleImageUpload = () => {
-    fileInputRef.current?.click();
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>, type: "image" | "file") => {
     const file = e.target.files?.[0];
-    if (file) {
+    if (!file) return;
+
+    if (type === "image") {
       const reader = new FileReader();
       reader.onload = () => {
-        const imageMessage: Message = {
+        setMessages(prev => [...prev, {
           id: Date.now().toString(),
-          content: isRTL ? "📸 تم إرفاق صورة للمشكلة" : "📸 Problem image attached",
+          content: isRTL ? "📸 صورة مرفقة" : "📸 Image attached",
           role: "user",
           timestamp: new Date(),
           type: "image",
           attachment: reader.result as string,
-        };
-        setMessages((prev) => [...prev, imageMessage]);
-        
-        toast({
-          title: isRTL ? "تم رفع الصورة" : "Image uploaded",
-          description: isRTL ? "تم إرفاق الصورة بنجاح" : "Image attached successfully",
-        });
-
-        setIsTyping(true);
-        setTimeout(() => {
-          const botResponse: Message = {
-            id: (Date.now() + 1).toString(),
-            content: isRTL
-              ? "شكراً لإرسال الصورة! تم تسجيل المشكلة وسيتم تحليلها من قبل فريقنا. رقم التذكرة: #" + Math.floor(Math.random() * 10000)
-              : "Thanks for sending the image! The issue has been logged and will be analyzed by our team. Ticket #" + Math.floor(Math.random() * 10000),
-            role: "bot",
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, botResponse]);
-          setIsTyping(false);
-        }, 2000);
+        }]);
+        const ticketId = Math.floor(Math.random() * 10000);
+        addBotResponse(
+          isRTL
+            ? `تم استلام الصورة وتسجيلها. رقم التذكرة: #${ticketId}`
+            : `Image received and logged. Ticket #${ticketId}`,
+          2000
+        );
       };
       reader.readAsDataURL(file);
+    } else {
+      setMessages(prev => [...prev, {
+        id: Date.now().toString(),
+        content: isRTL ? `📎 ملف: ${file.name}` : `📎 File: ${file.name}`,
+        role: "user",
+        timestamp: new Date(),
+        type: "file",
+        fileName: file.name,
+      }]);
+      const ticketId = Math.floor(Math.random() * 10000);
+      addBotResponse(
+        isRTL
+          ? `تم استلام الملف "${file.name}". رقم التذكرة: #${ticketId}`
+          : `File "${file.name}" received. Ticket #${ticketId}`,
+        2000
+      );
     }
     if (e.target) e.target.value = "";
   };
 
   const handleVoiceRecord = () => {
     if (isRecording) {
-      // Stop recording
       setIsRecording(false);
-      if (recordingInterval.current) {
-        clearInterval(recordingInterval.current);
-      }
-      
-      const voiceMessage: Message = {
+      if (recordingInterval.current) clearInterval(recordingInterval.current);
+
+      setMessages(prev => [...prev, {
         id: Date.now().toString(),
-        content: isRTL 
-          ? `🎙️ رسالة صوتية (${recordingTime} ثانية)` 
+        content: isRTL
+          ? `🎙️ رسالة صوتية (${recordingTime} ثانية)`
           : `🎙️ Voice message (${recordingTime}s)`,
         role: "user",
         timestamp: new Date(),
         type: "voice",
-      };
-      setMessages((prev) => [...prev, voiceMessage]);
+      }]);
       setRecordingTime(0);
 
-      toast({
-        title: isRTL ? "تم إرسال الرسالة الصوتية" : "Voice message sent",
-        description: isRTL ? "تم تسجيل الرسالة بنجاح" : "Voice recorded successfully",
-      });
-
-      setIsTyping(true);
-      setTimeout(() => {
-        const botResponse: Message = {
-          id: (Date.now() + 1).toString(),
-          content: isRTL
-            ? "شكراً لوصفك الصوتي! تم تسجيل تفاصيل المشكلة وإنشاء تذكرة برقم #" + Math.floor(Math.random() * 10000) + ". سيتصل بك فني متخصص قريباً."
-            : "Thanks for your voice description! Problem details have been recorded and ticket #" + Math.floor(Math.random() * 10000) + " created. A specialist will contact you soon.",
-          role: "bot",
-          timestamp: new Date(),
-        };
-        setMessages((prev) => [...prev, botResponse]);
-        setIsTyping(false);
-      }, 2000);
+      const ticketId = Math.floor(Math.random() * 10000);
+      addBotResponse(
+        isRTL
+          ? `تم استلام الرسالة الصوتية. رقم التذكرة: #${ticketId}`
+          : `Voice message received. Ticket #${ticketId}`,
+        2000
+      );
     } else {
-      // Start recording
       setIsRecording(true);
       setRecordingTime(0);
       recordingInterval.current = setInterval(() => {
-        setRecordingTime((prev) => prev + 1);
+        setRecordingTime(prev => prev + 1);
       }, 1000);
     }
   };
@@ -201,99 +208,117 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
       animate={{ opacity: 1, y: 0, scale: 1 }}
       exit={{ opacity: 0, y: 20, scale: 0.95 }}
       transition={{ duration: 0.3 }}
-      className="fixed bottom-24 right-6 z-50 w-[360px] max-w-[calc(100vw-3rem)] h-[520px] max-h-[75vh] bg-card rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col"
+      className="fixed bottom-24 right-6 z-50 w-[380px] max-w-[calc(100vw-2rem)] h-[540px] max-h-[80vh] rounded-2xl shadow-2xl border border-border overflow-hidden flex flex-col"
+      style={{ background: 'hsl(var(--background))' }}
       dir={isRTL ? 'rtl' : 'ltr'}
     >
-      {/* Hidden file input */}
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/*"
-        className="hidden"
-      />
+      {/* Hidden inputs */}
+      <input type="file" ref={fileInputRef} onChange={(e) => handleFileChange(e, "file")} className="hidden" />
+      <input type="file" ref={imageInputRef} onChange={(e) => handleFileChange(e, "image")} accept="image/*" className="hidden" />
+      <input type="file" ref={cameraInputRef} onChange={(e) => handleFileChange(e, "image")} accept="image/*" capture="environment" className="hidden" />
 
       {/* Header */}
-      <div className="bg-primary p-4 flex items-center justify-between">
+      <div className="bg-primary px-4 py-3 flex items-center justify-between shrink-0">
         <div className="flex items-center gap-3">
           <div className="relative">
-            <Avatar className="w-10 h-10 border-2 border-secondary">
+            <Avatar className="w-9 h-9 border-2 border-primary-foreground/30">
               <AvatarImage src="/icons/uberfix-icon.gif" alt="UberFix Bot" />
               <AvatarFallback className="bg-secondary text-secondary-foreground">
-                <Bot className="w-5 h-5" />
+                <Bot className="w-4 h-4" />
               </AvatarFallback>
             </Avatar>
-            <span className="absolute bottom-0 right-0 w-3 h-3 bg-emerald-500 rounded-full border-2 border-primary" />
+            <span className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 bg-emerald-400 rounded-full border-2 border-primary" />
           </div>
           <div>
-            <h3 className="text-white font-semibold text-sm">
+            <h3 className="text-primary-foreground font-semibold text-sm">
               {isRTL ? "مساعد UberFix" : "UberFix Assistant"}
             </h3>
-            <p className="text-white/70 text-xs flex items-center gap-1">
+            <p className="text-primary-foreground/60 text-[11px] flex items-center gap-1">
               <Sparkles className="w-3 h-3" />
               {isRTL ? "متصل الآن" : "Online now"}
             </p>
           </div>
         </div>
-        <Button
-          variant="ghost"
-          size="icon"
-          onClick={onClose}
-          className="text-white/80 hover:text-white hover:bg-white/10"
-        >
-          <Minimize2 className="w-5 h-5" />
-        </Button>
+        <div className="flex items-center gap-1">
+          {/* WhatsApp Transfer Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={transferToWhatsApp}
+            className="text-primary-foreground/80 hover:text-emerald-400 hover:bg-primary-foreground/10 h-8 w-8"
+            title={isRTL ? "تحويل إلى واتساب" : "Transfer to WhatsApp"}
+          >
+            <Phone className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={onClose}
+            className="text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/10 h-8 w-8"
+          >
+            <Minimize2 className="w-4 h-4" />
+          </Button>
+        </div>
       </div>
 
+      {/* WhatsApp Banner */}
+      <button
+        onClick={transferToWhatsApp}
+        className="flex items-center justify-center gap-2 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-medium transition-colors shrink-0"
+      >
+        <MessageSquare className="w-3.5 h-3.5" />
+        {isRTL ? "تحدث مباشرة عبر واتساب الأعمال" : "Chat directly on WhatsApp Business"}
+      </button>
+
       {/* Messages Area */}
-      <ScrollArea className="flex-1 p-4" ref={scrollRef}>
-        <div className="space-y-4">
+      <ScrollArea className="flex-1 p-3" ref={scrollRef}>
+        <div className="space-y-3">
           {messages.map((message) => (
             <motion.div
               key={message.id}
-              initial={{ opacity: 0, y: 10 }}
+              initial={{ opacity: 0, y: 8 }}
               animate={{ opacity: 1, y: 0 }}
               className={`flex gap-2 ${message.role === "user" ? "flex-row-reverse" : ""}`}
             >
-              <Avatar className="w-8 h-8 shrink-0">
+              <Avatar className="w-7 h-7 shrink-0 mt-1">
                 {message.role === "bot" ? (
                   <>
                     <AvatarImage src="/icons/uberfix-icon.gif" alt="Bot" />
-                    <AvatarFallback className="bg-secondary text-secondary-foreground">
-                      <Bot className="w-4 h-4" />
+                    <AvatarFallback className="bg-muted text-muted-foreground">
+                      <Bot className="w-3.5 h-3.5" />
                     </AvatarFallback>
                   </>
                 ) : (
-                  <AvatarFallback className="bg-primary text-primary-foreground">
-                    <User className="w-4 h-4" />
+                  <AvatarFallback className="bg-secondary text-secondary-foreground">
+                    <User className="w-3.5 h-3.5" />
                   </AvatarFallback>
                 )}
               </Avatar>
               <div
-                className={`max-w-[75%] p-3 rounded-2xl text-sm ${
+                className={`max-w-[78%] px-3 py-2 rounded-2xl text-[13px] leading-relaxed ${
                   message.role === "user"
-                    ? "bg-primary text-primary-foreground rounded-tr-sm"
-                    : "bg-muted text-foreground rounded-tl-sm"
+                    ? "bg-primary text-primary-foreground rounded-br-sm"
+                    : "bg-muted text-foreground rounded-bl-sm"
                 }`}
               >
                 {message.type === "image" && message.attachment && (
-                  <img 
-                    src={message.attachment} 
-                    alt="Uploaded" 
-                    className="max-w-full rounded-lg mb-2"
+                  <img
+                    src={message.attachment}
+                    alt="Uploaded"
+                    className="max-w-full rounded-lg mb-1.5"
                   />
                 )}
                 {message.type === "voice" && (
                   <div className="flex items-center gap-2 mb-1">
-                    <div className="w-8 h-8 rounded-full bg-secondary/20 flex items-center justify-center">
-                      <Mic className="w-4 h-4" />
+                    <div className="w-7 h-7 rounded-full bg-primary-foreground/20 flex items-center justify-center">
+                      <Mic className="w-3.5 h-3.5" />
                     </div>
                     <div className="flex gap-0.5">
                       {[...Array(12)].map((_, i) => (
-                        <div 
-                          key={i} 
-                          className="w-1 bg-current rounded-full opacity-60"
-                          style={{ height: `${Math.random() * 16 + 4}px` }}
+                        <div
+                          key={i}
+                          className="w-0.5 bg-current rounded-full opacity-50"
+                          style={{ height: `${Math.random() * 14 + 4}px` }}
                         />
                       ))}
                     </div>
@@ -303,25 +328,20 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
               </div>
             </motion.div>
           ))}
-          
-          {/* Typing Indicator */}
+
           {isTyping && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex gap-2"
-            >
-              <Avatar className="w-8 h-8">
+            <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex gap-2">
+              <Avatar className="w-7 h-7 mt-1">
                 <AvatarImage src="/icons/uberfix-icon.gif" alt="Bot" />
-                <AvatarFallback className="bg-secondary text-secondary-foreground">
-                  <Bot className="w-4 h-4" />
+                <AvatarFallback className="bg-muted text-muted-foreground">
+                  <Bot className="w-3.5 h-3.5" />
                 </AvatarFallback>
               </Avatar>
-              <div className="bg-muted p-3 rounded-2xl rounded-tl-sm">
+              <div className="bg-muted px-3 py-2.5 rounded-2xl rounded-bl-sm">
                 <div className="flex gap-1">
-                  <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <span className="w-2 h-2 bg-foreground/40 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
+                  <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
+                  <span className="w-1.5 h-1.5 bg-muted-foreground/50 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
                 </div>
               </div>
             </motion.div>
@@ -330,13 +350,13 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
       </ScrollArea>
 
       {/* Quick Actions */}
-      <div className="px-4 py-2 border-t border-border">
-        <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+      <div className="px-3 py-1.5 border-t border-border shrink-0">
+        <div className="flex gap-1.5 overflow-x-auto pb-1 scrollbar-hide">
           {quickActions.map((action, index) => (
             <button
               key={index}
               onClick={() => handleQuickAction(action)}
-              className="shrink-0 px-3 py-1.5 text-xs bg-muted hover:bg-muted/80 rounded-full text-foreground transition-colors"
+              className="shrink-0 px-2.5 py-1 text-[11px] bg-muted hover:bg-accent/20 rounded-full text-foreground transition-colors border border-border"
             >
               {action}
             </button>
@@ -344,73 +364,82 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
         </div>
       </div>
 
-      {/* Input Area with Media Buttons */}
-      <div className="p-4 border-t border-border bg-background">
-        {/* Recording indicator */}
+      {/* Input Area */}
+      <div className="px-3 py-2.5 border-t border-border shrink-0" style={{ background: 'hsl(var(--background))' }}>
         {isRecording && (
-          <div className="flex items-center justify-center gap-2 mb-3 py-2 px-4 bg-destructive/10 rounded-full">
-            <span className="w-3 h-3 bg-destructive rounded-full animate-pulse" />
-            <span className="text-sm text-destructive font-medium">
+          <div className="flex items-center justify-center gap-2 mb-2 py-1.5 px-3 bg-destructive/10 rounded-full">
+            <span className="w-2.5 h-2.5 bg-destructive rounded-full animate-pulse" />
+            <span className="text-xs text-destructive font-medium">
               {isRTL ? `جاري التسجيل... ${recordingTime}ث` : `Recording... ${recordingTime}s`}
             </span>
           </div>
         )}
-        
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            handleSendMessage();
-          }}
-          className="flex gap-2 items-center"
-        >
-          {/* Image Upload Button */}
+
+        {/* Media buttons row */}
+        <div className="flex items-center gap-1 mb-2">
           <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={handleImageUpload}
-            className="shrink-0 text-muted-foreground hover:text-secondary hover:bg-secondary/10"
+            type="button" variant="ghost" size="icon"
+            onClick={() => cameraInputRef.current?.click()}
+            className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted"
+            title={isRTL ? "تصوير مباشر" : "Take photo"}
+          >
+            <Camera className="w-4 h-4" />
+          </Button>
+          <Button
+            type="button" variant="ghost" size="icon"
+            onClick={() => imageInputRef.current?.click()}
+            className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted"
             title={isRTL ? "رفع صورة" : "Upload image"}
           >
-            <Camera className="w-5 h-5" />
+            <svg className="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <rect width="18" height="18" x="3" y="3" rx="2" ry="2" />
+              <circle cx="9" cy="9" r="2" />
+              <path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" />
+            </svg>
           </Button>
-
-          {/* Voice Record Button */}
           <Button
-            type="button"
-            variant="ghost"
-            size="icon"
-            onClick={handleVoiceRecord}
-            className={`shrink-0 transition-all ${
-              isRecording 
-                ? "text-destructive bg-destructive/10 hover:bg-destructive/20" 
-                : "text-muted-foreground hover:text-secondary hover:bg-secondary/10"
-            }`}
-            title={isRTL ? "تسجيل صوتي" : "Record voice"}
+            type="button" variant="ghost" size="icon"
+            onClick={() => fileInputRef.current?.click()}
+            className="h-7 w-7 text-muted-foreground hover:text-foreground hover:bg-muted"
+            title={isRTL ? "إرفاق ملف" : "Attach file"}
           >
-            {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+            <Paperclip className="w-4 h-4" />
           </Button>
+          <Button
+            type="button" variant="ghost" size="icon"
+            onClick={handleVoiceRecord}
+            className={`h-7 w-7 transition-colors ${
+              isRecording
+                ? "text-destructive bg-destructive/10"
+                : "text-muted-foreground hover:text-foreground hover:bg-muted"
+            }`}
+            title={isRTL ? "تسجيل صوتي" : "Voice note"}
+          >
+            {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </Button>
+        </div>
 
+        <form
+          onSubmit={(e) => { e.preventDefault(); handleSendMessage(); }}
+          className="flex gap-2 items-center"
+        >
           <Input
             ref={inputRef}
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
             placeholder={isRTL ? "اكتب رسالتك..." : "Type your message..."}
-            className="flex-1 rounded-full bg-muted border-0 focus-visible:ring-1 focus-visible:ring-secondary"
+            className="flex-1 rounded-full bg-muted border-0 h-9 text-sm focus-visible:ring-1 focus-visible:ring-primary/30"
             disabled={isRecording}
           />
           <Button
             type="submit"
             size="icon"
             disabled={!inputValue.trim() || isRecording}
-            className="rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/90 shrink-0"
+            className="rounded-full bg-primary text-primary-foreground hover:bg-primary/90 shrink-0 h-9 w-9"
           >
-            <Send className={`w-4 h-4 ${isRTL ? 'rotate-180' : ''}`} />
+            <Send className="w-4 h-4" />
           </Button>
         </form>
-        <p className="text-[10px] text-muted-foreground text-center mt-2">
-          {isRTL ? "مدعوم بالذكاء الاصطناعي • رفع صور • رسائل صوتية" : "Powered by AI • Image upload • Voice messages"}
-        </p>
       </div>
     </motion.div>
   );
