@@ -56,20 +56,17 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
   const recordingInterval = useRef<ReturnType<typeof setInterval> | null>(null);
   const abortRef = useRef<AbortController | null>(null);
   const conversationIdRef = useRef<string | null>(null);
-  const sessionIdRef = useRef<string>(
-    () => {
-      const stored = sessionStorage.getItem("uberfix_chat_session");
-      if (stored) return stored;
-      const id = crypto.randomUUID();
-      sessionStorage.setItem("uberfix_chat_session", id);
-      return id;
-    }
-  );
+  const sessionIdRef = useRef<string>("");
 
   // Initialize session id
   useEffect(() => {
-    if (typeof sessionIdRef.current === "function") {
-      sessionIdRef.current = (sessionIdRef.current as any)();
+    const stored = sessionStorage.getItem("uberfix_chat_session");
+    if (stored) {
+      sessionIdRef.current = stored;
+    } else {
+      const id = crypto.randomUUID();
+      sessionStorage.setItem("uberfix_chat_session", id);
+      sessionIdRef.current = id;
     }
   }, []);
 
