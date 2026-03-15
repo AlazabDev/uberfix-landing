@@ -354,8 +354,27 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
   };
 
   const handleQuickAction = (action: string) => {
+    if (action.includes("طلب صيانة") || action.includes("maintenance request")) {
+      setShowMaintenanceForm(true);
+      return;
+    }
     setInputValue(action);
     inputRef.current?.focus();
+  };
+
+  const handleMaintenanceSuccess = (requestNumber: string) => {
+    setShowMaintenanceForm(false);
+    const successMsg = requestNumber
+      ? (isRTL ? `✅ تم تسجيل طلب الصيانة بنجاح! رقم الطلب: ${requestNumber}` : `✅ Maintenance request submitted! Request #: ${requestNumber}`)
+      : (isRTL ? "✅ تم تسجيل طلب الصيانة بنجاح!" : "✅ Maintenance request submitted!");
+    const newMsg: Message = {
+      id: Date.now().toString(),
+      content: successMsg,
+      role: "bot",
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, newMsg]);
+    saveMessage("bot", successMsg);
   };
 
   return (
