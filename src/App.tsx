@@ -38,6 +38,7 @@ const Install = lazy(() => import("./pages/Install"));
 const Portfolio = lazy(() => import("./pages/Portfolio"));
 const Dashboard = lazy(() => import("./pages/Dashboard"));
 const ChatBotSettings = lazy(() => import("./pages/ChatBotSettings"));
+const MaintenanceRequest = lazy(() => import("./pages/MaintenanceRequest"));
 
 const queryClient = new QueryClient();
 
