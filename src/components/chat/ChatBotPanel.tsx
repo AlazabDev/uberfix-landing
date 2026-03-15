@@ -239,6 +239,11 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
           } catch { /* ignore */ }
         }
       }
+
+      // Save bot response to DB
+      if (assistantContent.trim()) {
+        saveMessage("bot", assistantContent);
+      }
     } catch (err: any) {
       if (err.name === "AbortError") return;
       setIsTyping(false);
