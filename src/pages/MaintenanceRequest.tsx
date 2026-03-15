@@ -136,7 +136,7 @@ const MaintenanceRequest = () => {
             animate={{ scale: 1, opacity: 1 }}
             className="text-center max-w-md"
           >
-            <CheckCircle className="w-20 h-20 text-emerald-500 mx-auto mb-6" />
+            <CheckCircle className="w-20 h-20 text-secondary mx-auto mb-6" />
             <h2 className="text-2xl font-bold text-foreground mb-3">
               {isRTL ? "تم تسجيل طلبك بنجاح!" : "Request Submitted Successfully!"}
             </h2>
