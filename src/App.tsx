@@ -92,6 +92,7 @@ const App = () => (
               <Route path="/portfolio" element={<LazyPage><Portfolio /></LazyPage>} />
               <Route path="/dashboard" element={<LazyPage><Dashboard /></LazyPage>} />
               <Route path="/chatbot-settings" element={<LazyPage><ChatBotSettings /></LazyPage>} />
+              <Route path="/maintenance-request" element={<LazyPage><MaintenanceRequest /></LazyPage>} />
               <Route path="*" element={<LazyPage><NotFound /></LazyPage>} />
             </Routes>
           </AnimatePresence>
