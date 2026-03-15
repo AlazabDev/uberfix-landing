@@ -262,7 +262,7 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
         variant: "destructive",
       });
     }
-  }, [isRTL, toast]);
+  }, [isRTL, toast, saveMessage]);
 
   const handleSendMessage = () => {
     if (!inputValue.trim()) return;
