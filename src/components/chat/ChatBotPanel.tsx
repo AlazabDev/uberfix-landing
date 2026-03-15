@@ -307,6 +307,7 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
       };
       const newMessages = [...messages, fileMsg];
       setMessages(newMessages);
+      saveMessage("user", fileMsg.content, "file", file.name);
       streamAIResponse(isRTL ? `أرسلت ملف بعنوان ${file.name}` : `I sent a file named ${file.name}`, newMessages);
     }
     if (e.target) e.target.value = "";
