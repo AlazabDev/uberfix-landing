@@ -271,6 +271,7 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
     const newMessages = [...messages, userMsg];
     setMessages(newMessages);
     setInputValue("");
+    saveMessage("user", inputValue, "text");
     streamAIResponse(inputValue, newMessages);
   };
 
