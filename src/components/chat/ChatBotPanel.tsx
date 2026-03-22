@@ -51,6 +51,7 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
   const [isRecording, setIsRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const [showMaintenanceForm, setShowMaintenanceForm] = useState(false);
+  const [showTrackingForm, setShowTrackingForm] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -357,10 +358,28 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
   const handleQuickAction = (action: string) => {
     if (action.includes("طلب صيانة") || action.includes("maintenance request")) {
       setShowMaintenanceForm(true);
+      setShowTrackingForm(false);
+      return;
+    }
+    if (action.includes("تتبع طلبي") || action.includes("Track my order")) {
+      setShowTrackingForm(true);
+      setShowMaintenanceForm(false);
       return;
     }
     setInputValue(action);
     inputRef.current?.focus();
+  };
+
+  const handleTrackingResult = (summary: string) => {
+    setShowTrackingForm(false);
+    const newMsg: Message = {
+      id: Date.now().toString(),
+      content: summary,
+      role: "bot",
+      timestamp: new Date(),
+    };
+    setMessages(prev => [...prev, newMsg]);
+    saveMessage("bot", summary);
   };
 
   const handleMaintenanceSuccess = (requestNumber: string) => {
@@ -553,6 +572,13 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
             <ChatMaintenanceForm
               onClose={() => setShowMaintenanceForm(false)}
               onSuccess={handleMaintenanceSuccess}
+            />
+          )}
+
+          {showTrackingForm && (
+            <ChatTrackingForm
+              onClose={() => setShowTrackingForm(false)}
+              onResult={handleTrackingResult}
             />
           )}
         <div className="flex items-center gap-1 mb-2">
