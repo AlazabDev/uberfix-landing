@@ -49,12 +49,24 @@ export async function submitMaintenanceRequest(data: MaintenanceFormData, channe
     method: "POST",
     headers: {
       "Content-Type": "application/json",
-      Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY}`,
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
     },
     body: JSON.stringify({ ...data, channel }),
   });
   const result = await resp.json();
-  if (!resp.ok) throw new Error(result.error || "Failed to submit");
+  if (!resp.ok) throw new Error(result.error || result.message || "Failed to submit");
+  return result;
+}
+
+export async function queryMaintenanceRequest(params: { request_number?: string; client_phone?: string }) {
+  const query = new URLSearchParams(params as Record<string, string>).toString();
+  const resp = await fetch(`${API_URL}?${query}`, {
+    headers: {
+      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+    },
+  });
+  const result = await resp.json();
+  if (!resp.ok) throw new Error(result.error || "Failed to query");
   return result;
 }
 
