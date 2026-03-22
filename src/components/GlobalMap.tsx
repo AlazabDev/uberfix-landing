@@ -102,9 +102,10 @@ const GlobalMap = () => {
     const slowSpinZoom = 3;
     let userInteracting = false;
     let spinEnabled = true;
+    let isSpinning = false;
 
     function spinGlobe() {
-      if (!map.current) return;
+      if (!map.current || isSpinning) return;
       
       const zoom = map.current.getZoom();
       if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
@@ -115,6 +116,7 @@ const GlobalMap = () => {
         }
         const center = map.current.getCenter();
         center.lng -= distancePerSecond;
+        isSpinning = true;
         map.current.easeTo({ center, duration: 1000, easing: (n) => n });
       }
     }
@@ -138,6 +140,7 @@ const GlobalMap = () => {
     });
 
     map.current.on('moveend', () => {
+      isSpinning = false;
       spinGlobe();
     });
 
