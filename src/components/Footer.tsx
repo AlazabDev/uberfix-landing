@@ -28,7 +28,7 @@ const Footer = () => {
   };
 
   return (
-    <footer className="bg-card border-t border-border py-12">
+    <footer className="bg-primary text-primary-foreground py-12">
       <div className="container mx-auto px-4">
         <div className="grid md:grid-cols-6 gap-8 mb-8">
           <div className="md:col-span-2 space-y-4">
@@ -43,25 +43,25 @@ const Footer = () => {
                 UberFix
               </span>
             </div>
-            <p className="text-muted-foreground leading-relaxed max-w-md">
+            <p className="text-primary-foreground/70 leading-relaxed max-w-md">
               {t("footer.description")}
             </p>
           </div>
 
           <div>
-            <h3 className="font-bold text-foreground mb-4">{t("footer.quickLinks")}</h3>
-            <ul className="space-y-2 text-muted-foreground">
-              <li><a href="/" className="hover:text-primary transition-colors">{t("nav.home")}</a></li>
-              <li><a href="/services" className="hover:text-primary transition-colors">{t("nav.services")}</a></li>
-              <li><a href="/about" className="hover:text-primary transition-colors">{t("nav.about")}</a></li>
-              <li><a href="/contact" className="hover:text-primary transition-colors">{t("nav.contact")}</a></li>
-              <li><a href="/help" className="hover:text-primary transition-colors">{t("nav.help")}</a></li>
+            <h3 className="font-bold text-primary-foreground mb-4">{t("footer.quickLinks")}</h3>
+            <ul className="space-y-2 text-primary-foreground/70">
+              <li><a href="/" className="hover:text-secondary transition-colors">{t("nav.home")}</a></li>
+              <li><a href="/services" className="hover:text-secondary transition-colors">{t("nav.services")}</a></li>
+              <li><a href="/about" className="hover:text-secondary transition-colors">{t("nav.about")}</a></li>
+              <li><a href="/contact" className="hover:text-secondary transition-colors">{t("nav.contact")}</a></li>
+              <li><a href="/help" className="hover:text-secondary transition-colors">{t("nav.help")}</a></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-bold text-foreground mb-4">{t("footer.ourServices")}</h3>
-            <ul className="space-y-2 text-muted-foreground">
+            <h3 className="font-bold text-primary-foreground mb-4">{t("footer.ourServices")}</h3>
+            <ul className="space-y-2 text-primary-foreground/70">
               <li><a href="/luxury-finishing" className="hover:text-secondary transition-colors">{t("nav.luxury")}</a></li>
               <li><a href="/brand-identity" className="hover:text-secondary transition-colors">{t("nav.brand")}</a></li>
               <li><a href="/labn-elasfor" className="hover:text-secondary transition-colors">{t("nav.labn")}</a></li>
@@ -70,18 +70,18 @@ const Footer = () => {
           </div>
 
           <div>
-            <h3 className="font-bold text-foreground mb-4">{t("footer.legal")}</h3>
-            <ul className="space-y-2 text-muted-foreground">
-              <li><a href="/terms" className="hover:text-primary transition-colors">{t("footer.terms")}</a></li>
-              <li><a href="/privacy" className="hover:text-primary transition-colors">{t("footer.privacy")}</a></li>
-              <li><a href="/faq" className="hover:text-primary transition-colors">{t("nav.faq")}</a></li>
-              <li><a href="/technicians" className="hover:text-primary transition-colors">{t("nav.technicians")}</a></li>
+            <h3 className="font-bold text-primary-foreground mb-4">{t("footer.legal")}</h3>
+            <ul className="space-y-2 text-primary-foreground/70">
+              <li><a href="/terms" className="hover:text-secondary transition-colors">{t("footer.terms")}</a></li>
+              <li><a href="/privacy" className="hover:text-secondary transition-colors">{t("footer.privacy")}</a></li>
+              <li><a href="/faq" className="hover:text-secondary transition-colors">{t("nav.faq")}</a></li>
+              <li><a href="/technicians" className="hover:text-secondary transition-colors">{t("nav.technicians")}</a></li>
             </ul>
           </div>
 
           <div>
-            <h3 className="font-bold text-foreground mb-4">{t("footer.newsletter", "النشرة البريدية")}</h3>
-            <p className="text-muted-foreground text-sm mb-4">
+            <h3 className="font-bold text-primary-foreground mb-4">{t("footer.newsletter", "النشرة البريدية")}</h3>
+            <p className="text-primary-foreground/70 text-sm mb-4">
               {t("footer.newsletterDesc", "اشترك للحصول على آخر العروض والأخبار")}
             </p>
             <form onSubmit={handleSubscribe} className="space-y-3">
@@ -92,7 +92,7 @@ const Footer = () => {
                   placeholder={t("footer.emailPlaceholder", "بريدك الإلكتروني")}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="ps-10 bg-background border-border"
+                  className="ps-10 bg-primary-foreground/10 border-primary-foreground/20 text-primary-foreground placeholder:text-primary-foreground/50"
                   required
                 />
               </div>
@@ -114,18 +114,18 @@ const Footer = () => {
           </div>
         </div>
 
-        <div className="border-t border-border pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-start">
-          <p className="text-muted-foreground text-sm">Al-Azab Construction Company… D-U-N-S No.: 849203826</p>
-          <div className="flex items-center gap-4 text-sm text-muted-foreground">
-            <a href="/terms" className="hover:text-primary transition-colors">{t("footer.termsShort")}</a>
+        <div className="border-t border-primary-foreground/20 pt-8 flex flex-col md:flex-row items-center justify-between gap-4 text-center md:text-start">
+          <p className="text-primary-foreground/60 text-sm">Al-Azab Construction Company… D-U-N-S No.: 849203826</p>
+          <div className="flex items-center gap-4 text-sm text-primary-foreground/60">
+            <a href="/terms" className="hover:text-secondary transition-colors">{t("footer.termsShort")}</a>
             <span>|</span>
-            <a href="/privacy" className="hover:text-primary transition-colors">{t("footer.privacyShort")}</a>
+            <a href="/privacy" className="hover:text-secondary transition-colors">{t("footer.privacyShort")}</a>
             <span>|</span>
-            <a href="https://uberfix.shop" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            <a href="https://uberfix.shop" target="_blank" rel="noopener noreferrer" className="text-secondary hover:underline">
               uberfix.shop
             </a>
           </div>
-          <p className="text-muted-foreground text-sm">{t("footer.copyright")}</p>
+          <p className="text-primary-foreground/60 text-sm">{t("footer.copyright")}</p>
         </div>
       </div>
     </footer>
