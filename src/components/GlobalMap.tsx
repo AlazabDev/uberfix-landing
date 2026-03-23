@@ -62,7 +62,7 @@ const GlobalMap = () => {
     try {
       map.current = new mapboxgl.Map({
         container: mapContainer.current,
-        style: 'mapbox://styles/mapbox/standard',
+        style: 'mapbox://styles/mapbox/streets-v12',
         projection: { name: 'globe' },
         zoom: 1.5,
         center: [30, 20],
@@ -88,50 +88,48 @@ const GlobalMap = () => {
     map.current.scrollZoom.disable();
 
     map.current.on('style.load', () => {
-      map.current?.setFog({
-        color: 'rgb(30, 30, 40)',
-        'high-color': 'rgb(50, 50, 70)',
-        'horizon-blend': 0.4,
-        'space-color': 'rgb(10, 10, 20)',
-        'star-intensity': 0.6
-      });
+      // Fog is only available with 'standard' style
+      // Removed to avoid errors with streets-v12
     });
 
-    const secondsPerRevolution = 360;
     const maxSpinZoom = 5;
     const slowSpinZoom = 3;
     let userInteracting = false;
-    let spinEnabled = true;
-    let spinTimer: ReturnType<typeof setTimeout> | null = null;
-    let isSpinning = false;
+    let spinAnimationId: ReturnType<typeof requestAnimationFrame> | null = null;
+    let lastSpinTime = 0;
 
-    function spinGlobe() {
-      if (spinTimer) { clearTimeout(spinTimer); spinTimer = null; }
-      if (!map.current || isSpinning) return;
+    function spinGlobe(timestamp: number) {
+      if (!map.current) return;
+
       const zoom = map.current.getZoom();
-      if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
-        let distancePerSecond = 360 / secondsPerRevolution;
-        if (zoom > slowSpinZoom) {
-          const zoomDif = (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
-          distancePerSecond *= zoomDif;
+      if (!userInteracting && zoom < maxSpinZoom) {
+        const elapsed = timestamp - lastSpinTime;
+        if (elapsed >= 16) {
+          lastSpinTime = timestamp;
+          // Full revolution every ~120 seconds at 60fps
+          let degreesPerFrame = 360 / (120 * 60);
+          if (zoom > slowSpinZoom) {
+            const zoomDif = (maxSpinZoom - zoom) / (maxSpinZoom - slowSpinZoom);
+            degreesPerFrame *= zoomDif;
+          }
+          const center = map.current.getCenter();
+          center.lng -= degreesPerFrame;
+          // Use jumpTo (not easeTo) to avoid triggering moveend → recursive loop
+          map.current.jumpTo({ center });
         }
-        const center = map.current.getCenter();
-        center.lng -= distancePerSecond;
-        isSpinning = true;
-        map.current.easeTo({ center, duration: 2000, easing: (n) => n });
       }
+
+      spinAnimationId = requestAnimationFrame(spinGlobe);
     }
 
     map.current.on('mousedown', () => { userInteracting = true; });
     map.current.on('dragstart', () => { userInteracting = true; });
     map.current.on('mouseup', () => { userInteracting = false; });
     map.current.on('touchend', () => { userInteracting = false; });
+    map.current.on('zoomstart', () => { userInteracting = true; });
+    map.current.on('zoomend', () => { userInteracting = false; });
 
-    map.current.on('moveend', () => {
-      isSpinning = false;
-      if (spinTimer) clearTimeout(spinTimer);
-      spinTimer = setTimeout(spinGlobe, 500);
-    });
+    spinAnimationId = requestAnimationFrame(spinGlobe);
 
     // Add markers for branches
     branches.forEach((branch) => {
@@ -172,6 +170,7 @@ const GlobalMap = () => {
     spinGlobe();
 
     return () => {
+      if (spinAnimationId !== null) cancelAnimationFrame(spinAnimationId);
       map.current?.remove();
     };
   }, [branches, mapboxToken, isRTL, t]);
