@@ -97,16 +97,17 @@ const GlobalMap = () => {
       });
     });
 
-    const secondsPerRevolution = 180;
+    const secondsPerRevolution = 360;
     const maxSpinZoom = 5;
     const slowSpinZoom = 3;
     let userInteracting = false;
     let spinEnabled = true;
     let spinTimer: ReturnType<typeof setTimeout> | null = null;
+    let isSpinning = false;
 
     function spinGlobe() {
       if (spinTimer) { clearTimeout(spinTimer); spinTimer = null; }
-      if (!map.current) return;
+      if (!map.current || isSpinning) return;
       const zoom = map.current.getZoom();
       if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
         let distancePerSecond = 360 / secondsPerRevolution;
@@ -116,7 +117,8 @@ const GlobalMap = () => {
         }
         const center = map.current.getCenter();
         center.lng -= distancePerSecond;
-        map.current.easeTo({ center, duration: 1000, easing: (n) => n });
+        isSpinning = true;
+        map.current.easeTo({ center, duration: 2000, easing: (n) => n });
       }
     }
 
@@ -126,8 +128,9 @@ const GlobalMap = () => {
     map.current.on('touchend', () => { userInteracting = false; });
 
     map.current.on('moveend', () => {
+      isSpinning = false;
       if (spinTimer) clearTimeout(spinTimer);
-      spinTimer = setTimeout(spinGlobe, 150);
+      spinTimer = setTimeout(spinGlobe, 500);
     });
 
     // Add markers for branches
