@@ -102,11 +102,11 @@ const GlobalMap = () => {
     const slowSpinZoom = 3;
     let userInteracting = false;
     let spinEnabled = true;
-    let isSpinning = false;
+    let spinTimer: ReturnType<typeof setTimeout> | null = null;
 
     function spinGlobe() {
-      if (!map.current || isSpinning) return;
-      
+      if (spinTimer) { clearTimeout(spinTimer); spinTimer = null; }
+      if (!map.current) return;
       const zoom = map.current.getZoom();
       if (spinEnabled && !userInteracting && zoom < maxSpinZoom) {
         let distancePerSecond = 360 / secondsPerRevolution;
@@ -116,32 +116,18 @@ const GlobalMap = () => {
         }
         const center = map.current.getCenter();
         center.lng -= distancePerSecond;
-        isSpinning = true;
         map.current.easeTo({ center, duration: 1000, easing: (n) => n });
       }
     }
 
-    map.current.on('mousedown', () => {
-      userInteracting = true;
-    });
-    
-    map.current.on('dragstart', () => {
-      userInteracting = true;
-    });
-    
-    map.current.on('mouseup', () => {
-      userInteracting = false;
-      spinGlobe();
-    });
-    
-    map.current.on('touchend', () => {
-      userInteracting = false;
-      spinGlobe();
-    });
+    map.current.on('mousedown', () => { userInteracting = true; });
+    map.current.on('dragstart', () => { userInteracting = true; });
+    map.current.on('mouseup', () => { userInteracting = false; });
+    map.current.on('touchend', () => { userInteracting = false; });
 
     map.current.on('moveend', () => {
-      isSpinning = false;
-      spinGlobe();
+      if (spinTimer) clearTimeout(spinTimer);
+      spinTimer = setTimeout(spinGlobe, 150);
     });
 
     // Add markers for branches
