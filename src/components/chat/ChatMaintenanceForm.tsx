@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { submitMaintenanceRequest, type MaintenanceFormData } from "@/pages/MaintenanceRequest";
+import { submitMaintenanceRequest, type MaintenanceFormData } from "@/lib/maintenance-request";
 
 interface ChatMaintenanceFormProps {
   onClose: () => void;

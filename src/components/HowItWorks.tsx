@@ -1,13 +1,20 @@
-import { CheckCircle, Calendar, Wrench, Star } from "lucide-react";
+import { CheckCircle, Calendar, Wrench, Star, type LucideIcon } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+
+interface StepItem {
+  icon: LucideIcon;
+  titleKey: string;
+  descKey: string;
+}
 
 const HowItWorks = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
 
-  const steps = [
+  const steps: StepItem[] = [
     { icon: CheckCircle, titleKey: "howItWorks.step1Title", descKey: "howItWorks.step1Desc" },
     { icon: Calendar, titleKey: "howItWorks.step2Title", descKey: "howItWorks.step2Desc" },
     { icon: Wrench, titleKey: "howItWorks.step3Title", descKey: "howItWorks.step3Desc" },
@@ -47,7 +54,15 @@ const HowItWorks = () => {
   );
 };
 
-const StepCard = ({ step, index, totalSteps, t, isRTL }: { step: any; index: number; totalSteps: number; t: any; isRTL: boolean }) => {
+interface StepCardProps {
+  step: StepItem;
+  index: number;
+  totalSteps: number;
+  t: TFunction;
+  isRTL: boolean;
+}
+
+const StepCard = ({ step, index, totalSteps, t, isRTL }: StepCardProps) => {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
 
   return (

@@ -1,16 +1,25 @@
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Sparkles, Palette, Package, Wrench } from "lucide-react";
+import { Sparkles, Palette, Package, Wrench, type LucideIcon } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useTranslation } from "react-i18next";
 import { Link } from "react-router-dom";
+import type { TFunction } from "i18next";
+
+interface ServiceItem {
+  icon: LucideIcon;
+  titleKey: string;
+  descKey: string;
+  itemsKey: string;
+  link: string;
+}
 
 const Services = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
 
-  const services = [
+  const services: ServiceItem[] = [
     { icon: Sparkles, titleKey: "services.service1Title", descKey: "services.service1Desc", itemsKey: "services.service1Items", link: "/luxury-finishing" },
     { icon: Palette, titleKey: "services.service2Title", descKey: "services.service2Desc", itemsKey: "services.service2Items", link: "/brand-identity" },
     { icon: Package, titleKey: "services.service3Title", descKey: "services.service3Desc", itemsKey: "services.service3Items", link: "/labn-elasfor" },
@@ -47,7 +56,13 @@ const Services = () => {
   );
 };
 
-const ServiceCard = ({ service, index, t }: { service: any; index: number; t: any }) => {
+interface ServiceCardProps {
+  service: ServiceItem;
+  index: number;
+  t: TFunction;
+}
+
+const ServiceCard = ({ service, index, t }: ServiceCardProps) => {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
   const items = t(service.itemsKey).split(',');
 

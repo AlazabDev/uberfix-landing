@@ -1,14 +1,21 @@
 import { Card } from "@/components/ui/card";
-import { Users, ClipboardCheck, Zap, Shield, Clock, TrendingUp } from "lucide-react";
+import { Users, ClipboardCheck, Zap, Shield, Clock, TrendingUp, type LucideIcon } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+
+interface FeatureItem {
+  icon: LucideIcon;
+  titleKey: string;
+  descKey: string;
+}
 
 const Features = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
 
-  const features = [
+  const features: FeatureItem[] = [
     { icon: Users, titleKey: "features.feature1Title", descKey: "features.feature1Desc" },
     { icon: ClipboardCheck, titleKey: "features.feature2Title", descKey: "features.feature2Desc" },
     { icon: Zap, titleKey: "features.feature3Title", descKey: "features.feature3Desc" },
@@ -47,7 +54,13 @@ const Features = () => {
   );
 };
 
-const FeatureCard = ({ feature, index, t }: { feature: any; index: number; t: any }) => {
+interface FeatureCardProps {
+  feature: FeatureItem;
+  index: number;
+  t: TFunction;
+}
+
+const FeatureCard = ({ feature, index, t }: FeatureCardProps) => {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.2 });
 
   return (

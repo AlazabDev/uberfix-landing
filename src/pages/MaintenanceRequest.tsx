@@ -11,23 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
-
-const API_URL = `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/maintenance-request`;
-
-export interface MaintenanceFormData {
-  title: string;
-  description: string;
-  client_name: string;
-  client_phone: string;
-  client_email: string;
-  location: string;
-  service_type: string;
-  priority: string;
-  customer_notes: string;
-  category_id: string;
-  latitude: string;
-  longitude: string;
-}
+import { submitMaintenanceRequest, type MaintenanceFormData } from "@/lib/maintenance-request";
 
 const initialFormData: MaintenanceFormData = {
   title: "",
@@ -43,32 +27,6 @@ const initialFormData: MaintenanceFormData = {
   latitude: "",
   longitude: "",
 };
-
-export async function submitMaintenanceRequest(data: MaintenanceFormData, channel = "website") {
-  const resp = await fetch(API_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-    body: JSON.stringify({ ...data, channel }),
-  });
-  const result = await resp.json();
-  if (!resp.ok) throw new Error(result.error || result.message || "Failed to submit");
-  return result;
-}
-
-export async function queryMaintenanceRequest(params: { request_number?: string; client_phone?: string }) {
-  const query = new URLSearchParams(params as Record<string, string>).toString();
-  const resp = await fetch(`${API_URL}?${query}`, {
-    headers: {
-      apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-    },
-  });
-  const result = await resp.json();
-  if (!resp.ok) throw new Error(result.error || "Failed to query");
-  return result;
-}
 
 const serviceTypes = [
   { value: "plumbing", labelAr: "سباكة", labelEn: "Plumbing" },
@@ -127,10 +85,11 @@ const MaintenanceRequest = () => {
           ? `تم تسجيل طلب الصيانة ${result.data?.request_number || ""}`
           : `Maintenance request ${result.data?.request_number || ""} created`,
       });
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : isRTL ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
       toast({
         title: isRTL ? "خطأ" : "Error",
-        description: err.message,
+        description: message,
         variant: "destructive",
       });
     } finally {

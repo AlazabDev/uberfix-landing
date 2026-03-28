@@ -1,13 +1,22 @@
-import { ClipboardList, UserCheck, Wrench, CheckCircle } from "lucide-react";
+import { ClipboardList, UserCheck, Wrench, CheckCircle, type LucideIcon } from "lucide-react";
 import { useScrollAnimation } from "@/hooks/useScrollAnimation";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
+
+interface TimelineStepItem {
+  icon: LucideIcon;
+  numberKey: string;
+  titleKey: string;
+  descKey: string;
+  featuresKey: string;
+}
 
 const MaintenanceTimeline = () => {
   const { t, i18n } = useTranslation();
   const isRTL = i18n.language === 'ar';
   const { ref: headerRef, isVisible: headerVisible } = useScrollAnimation({ threshold: 0.2 });
 
-  const timelineSteps = [
+  const timelineSteps: TimelineStepItem[] = [
     {
       icon: ClipboardList,
       numberKey: "maintenanceTimeline.step1Number",
@@ -73,7 +82,14 @@ const MaintenanceTimeline = () => {
   );
 };
 
-const TimelineStep = ({ step, index, t, isRTL }: { step: any; index: number; t: any; isRTL: boolean }) => {
+interface TimelineStepProps {
+  step: TimelineStepItem;
+  index: number;
+  t: TFunction;
+  isRTL: boolean;
+}
+
+const TimelineStep = ({ step, index, t, isRTL }: TimelineStepProps) => {
   const { ref, isVisible } = useScrollAnimation({ threshold: 0.3 });
   const isEven = index % 2 === 0;
   

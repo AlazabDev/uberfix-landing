@@ -5,7 +5,11 @@ import { Search, X, Loader2, Phone, Hash, CheckCircle, Clock, AlertCircle } from
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { queryMaintenanceRequest } from "@/pages/MaintenanceRequest";
+import {
+  queryMaintenanceRequest,
+  type MaintenanceRequestQueryResult,
+  type MaintenanceRequestSummary,
+} from "@/lib/maintenance-request";
 
 interface ChatTrackingFormProps {
   onClose: () => void;
@@ -25,7 +29,7 @@ const ChatTrackingForm = ({ onClose, onResult }: ChatTrackingFormProps) => {
 
     setIsLoading(true);
     try {
-      const result = await queryMaintenanceRequest({ [searchBy]: value.trim() });
+      const result: MaintenanceRequestQueryResult = await queryMaintenanceRequest({ [searchBy]: value.trim() });
 
       if (!result || (Array.isArray(result.data) && result.data.length === 0)) {
         onResult(
@@ -37,7 +41,7 @@ const ChatTrackingForm = ({ onClose, onResult }: ChatTrackingFormProps) => {
       }
 
       const requests = Array.isArray(result.data) ? result.data : [result.data];
-      const lines = requests.map((r: any) => {
+      const lines = requests.map((r: MaintenanceRequestSummary) => {
         const status = r.status || "pending";
         const icon = status === "completed" ? "✅" : status === "in_progress" ? "🔄" : "⏳";
         return isRTL
@@ -50,11 +54,12 @@ const ChatTrackingForm = ({ onClose, onResult }: ChatTrackingFormProps) => {
         : `📋 Found ${requests.length} request(s):\n\n`;
 
       onResult(header + lines.join("\n\n"));
-    } catch (err: any) {
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : isRTL ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
       onResult(
         isRTL
-          ? `❌ خطأ في الاستعلام: ${err.message}`
-          : `❌ Query error: ${err.message}`
+          ? `❌ خطأ في الاستعلام: ${message}`
+          : `❌ Query error: ${message}`
       );
     } finally {
       setIsLoading(false);

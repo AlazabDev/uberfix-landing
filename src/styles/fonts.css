@@ -1,0 +1,247 @@
+/* =========================================
+   UberFix Landing Hub - Professional Fonts
+   مكان الملف: src/styles/fonts.css
+   ========================================= */
+
+/* ========= Font Face Definitions ========= */
+
+/* Arabic UI / Arabic headings */
+@font-face {
+    font-family: "AzabArabic";
+    src: url("../assets/fonts/GE-SS-Two-Bold.otf") format("opentype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* English headings only */
+@font-face {
+    font-family: "AzabEnglishHeading";
+    src: url("../assets/fonts/Jozoor.otf") format("opentype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* English serif family */
+@font-face {
+    font-family: "AzabSerif";
+    src: url("../assets/fonts/LibreBaskerville-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "AzabSerif";
+    src: url("../assets/fonts/LibreBaskerville-Italic.ttf") format("truetype");
+    font-weight: 400;
+    font-style: italic;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "AzabSerif";
+    src: url("../assets/fonts/LibreBaskerville-Bold.ttf") format("truetype");
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "AzabSerif";
+    src: url("../assets/fonts/LibreBaskerville-BoldItalic.otf") format("opentype");
+    font-weight: 700;
+    font-style: italic;
+    font-display: swap;
+}
+
+/* English UI / fallback */
+@font-face {
+    font-family: "AzabSans";
+    src: url("../assets/fonts/Roboto-Regular.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* Decorative brand usage only */
+@font-face {
+    font-family: "AzabDecorative";
+    src: url("../assets/fonts/HFWinterRose.ttf") format("truetype");
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+
+/* ========= Design Tokens ========= */
+
+:root {
+    --font-arabic: "AzabArabic", "Tahoma", "Arial", sans-serif;
+    --font-en-heading: "AzabEnglishHeading", "AzabSerif", "Georgia", serif;
+    --font-en-body: "AzabSerif", "Georgia", serif;
+    --font-ui: "AzabSans", "Segoe UI", "Arial", sans-serif;
+    --font-brand: "AzabDecorative", "AzabSerif", serif;
+}
+
+/* ========= Base Rules ========= */
+
+html[lang="ar"],
+html[dir="rtl"],
+body {
+    font-family: var(--font-arabic);
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+}
+
+/* English content blocks */
+html[lang="en"] body,
+body .lang-en,
+body [lang="en"] {
+    font-family: var(--font-ui);
+}
+
+/* ========= Headings ========= */
+
+/* Arabic headings */
+html[lang="ar"] h1,
+html[lang="ar"] h2,
+html[lang="ar"] h3,
+html[lang="ar"] h4,
+html[lang="ar"] h5,
+html[lang="ar"] h6,
+body h1:lang(ar),
+body h2:lang(ar),
+body h3:lang(ar),
+body h4:lang(ar),
+body h5:lang(ar),
+body h6:lang(ar),
+body .heading-ar {
+    font-family: var(--font-arabic);
+    font-weight: 700;
+    letter-spacing: 0;
+}
+
+/* English headings فقط بجسور */
+html[lang="en"] h1,
+html[lang="en"] h2,
+html[lang="en"] h3,
+html[lang="en"] h4,
+html[lang="en"] h5,
+html[lang="en"] h6,
+body h1:lang(en),
+body h2:lang(en),
+body h3:lang(en),
+body h4:lang(en),
+body h5:lang(en),
+body h6:lang(en),
+body .heading-en,
+body .hero-title-en,
+body .section-title-en,
+body .card-title-en {
+    font-family: var(--font-en-heading);
+    font-weight: 400;
+    letter-spacing: 0.02em;
+    line-height: 1.15;
+}
+
+/* ========= Body Text ========= */
+
+/* Arabic body */
+body p,
+body li,
+body span,
+body label,
+body input,
+body textarea,
+body button,
+body select,
+body small,
+body .text-ar {
+    font-family: var(--font-arabic);
+}
+
+/* English body text */
+body p:lang(en),
+body li:lang(en),
+body span:lang(en),
+body label:lang(en),
+body input:lang(en),
+body textarea:lang(en),
+body button:lang(en),
+body select:lang(en),
+body small:lang(en),
+body .text-en,
+body .description-en,
+body .content-en {
+    font-family: var(--font-ui);
+    font-weight: 400;
+}
+
+/* ========= Navigation / Buttons / UI ========= */
+
+.navbar,
+.navigation,
+.menu,
+.btn,
+.button,
+input,
+textarea,
+select,
+.badge,
+.tag,
+.form-control,
+.ui-text {
+    font-family: var(--font-ui);
+}
+
+/* لو عندك واجهة عربية وتريد الأزرار عربية */
+html[lang="ar"] .btn,
+html[lang="ar"] .button,
+html[lang="ar"] .navbar,
+html[lang="ar"] .navigation,
+html[lang="ar"] .menu,
+html[lang="ar"] input,
+html[lang="ar"] textarea,
+html[lang="ar"] select {
+    font-family: var(--font-arabic);
+}
+
+/* ========= Decorative Brand Usage ========= */
+
+.brand-signature,
+.brand-decorative,
+.brand-wordmark {
+    font-family: var(--font-brand);
+    letter-spacing: 0.03em;
+}
+
+/* ========= Utility Classes ========= */
+
+.font-ar {
+    font-family: var(--font-arabic) !important;
+}
+
+.font-en-heading {
+    font-family: var(--font-en-heading) !important;
+}
+
+.font-en-body {
+    font-family: var(--font-ui) !important;
+}
+
+.font-serif {
+    font-family: var(--font-en-body) !important;
+}
+
+.font-brand {
+    font-family: var(--font-brand) !important;
+}
+
+/* ========= Safe fallback for mixed text ========= */
+
+.mixed-content,
+.mixed-content * {
+    unicode-bidi: plaintext;
+}

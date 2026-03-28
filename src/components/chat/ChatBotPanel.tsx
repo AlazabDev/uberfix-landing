@@ -250,12 +250,13 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
       if (assistantContent.trim()) {
         saveMessage("bot", assistantContent);
       }
-    } catch (err: any) {
-      if (err.name === "AbortError") return;
+    } catch (error: unknown) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
       setIsTyping(false);
       const errorMsg = isRTL
         ? "عذراً، حدث خطأ. يرجى المحاولة مرة أخرى أو التواصل عبر واتساب."
         : "Sorry, an error occurred. Please try again or contact us via WhatsApp.";
+      const errorDescription = error instanceof Error ? error.message : isRTL ? "حدث خطأ غير متوقع" : "An unexpected error occurred";
       setMessages(prev => [...prev, {
         id: (Date.now() + 2).toString(),
         content: errorMsg,
@@ -264,7 +265,7 @@ const ChatBotPanel = ({ onClose }: ChatBotPanelProps) => {
       }]);
       toast({
         title: isRTL ? "خطأ" : "Error",
-        description: err.message,
+        description: errorDescription,
         variant: "destructive",
       });
     }
